@@ -13,11 +13,21 @@ const Container = styled.div`
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const Message = styled.p`
-  color: ${({ error }) => (error ? "red" : "blue")};
+  color: ${({ error }) => (error ? "#DC2626" : "#2563EB")}; 
   font-weight: bold;
+  margin-top: 1rem;
+  font-size: 1rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 function App() {
@@ -29,6 +39,7 @@ function App() {
   const handleAnalyzeImage = async (image) => {
     setIsLoading(true);
     setError(null);
+    
     try {
       const response = await analyzeImage(image);
       setResult(response);
@@ -48,8 +59,13 @@ function App() {
         <CameraCapture onCapture={handleAnalyzeImage} />
         <ImageUpload onUpload={handleAnalyzeImage} />
 
-        {isLoading && <Message>⏳ Analyzing image... Please wait.</Message>}
-        {error && <Message error>{error}</Message>}
+        {/* ✅ Improved Error/Loading Messages */}
+        {isLoading && (
+          <Message aria-live="polite">⏳ Analyzing image... Please wait.</Message>
+        )}
+        {error && (
+          <Message error aria-live="assertive">{error}</Message>
+        )}
         {result && <ResultDisplay result={result} />}
       </Container>
     </>
