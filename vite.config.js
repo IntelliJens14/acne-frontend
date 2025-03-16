@@ -1,28 +1,37 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import path from "node:path"; // ✅ Use `node:path` for compatibility
 
 export default defineConfig({
   plugins: [react()],
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"), // ✅ Allows importing with "@/"
+      "@": path.resolve(__dirname, "src"), // ✅ Allows importing with "@/components"
     },
   },
 
   server: {
-    port: 5173, // ✅ Change if needed
-    open: true, // ✅ Opens browser on `npm run dev`
-    cors: true, // ✅ Prevent CORS issues
+    port: 5173, // ✅ Change port if needed
+    open: true, // ✅ Auto-opens browser on `npm run dev`
+    cors: true, // ✅ Allow frontend to communicate with APIs
+
+    proxy: {
+      "/api": {
+        target: "https://acne-ai-backend.onrender.com",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
 
   build: {
-    outDir: "dist", // ✅ Ensure correct build folder
-    sourcemap: true, // ✅ Helps debugging
+    outDir: "dist", // ✅ Ensures correct output directory
+    sourcemap: true, // ✅ Useful for debugging
   },
 
   define: {
-    "process.env": {}, // ✅ Ensures compatibility with env variables
+    "process.env": {}, // ✅ Ensures environment variables work in Vite
   },
 });
