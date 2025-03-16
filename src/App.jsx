@@ -5,8 +5,9 @@ import Header from "./components/Header";
 import CameraCapture from "./components/CameraCapture";
 import ImageUpload from "./components/ImageUpload";
 import ResultDisplay from "./components/ResultDisplay";
-import { analyzeImage } from "./utils/api"; // ✅ Import optimized API function
+import { analyzeImage } from "./utils/api"; // ✅ Optimized API function
 
+// ✅ Styled Components
 const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
@@ -24,7 +25,7 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Handles image capture & upload
+  // ✅ Handles both image capture & upload
   const handleAnalyzeImage = async (image) => {
     setIsLoading(true);
     setError(null);
@@ -33,7 +34,7 @@ function App() {
       setResult(response);
     } catch (err) {
       console.error("❌ Error:", err);
-      setError("Failed to analyze image. Please try again.");
+      setError("❌ Failed to analyze image. Please try again.");
     } finally {
       setIsLoading(false);
     }
