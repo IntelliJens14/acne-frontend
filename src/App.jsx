@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import CameraCapture from "./components/CameraCapture";
 import ImageUpload from "./components/ImageUpload";
 import ResultDisplay from "./components/ResultDisplay";
+import { analyzeImage } from "./utils/api"; // ✅ Import optimized API function
 
 const Container = styled.div`
   max-width: 800px;
@@ -23,28 +24,13 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const analyzeImage = async (image) => {
+  // ✅ Handles image capture & upload
+  const handleAnalyzeImage = async (image) => {
     setIsLoading(true);
     setError(null);
-
     try {
-      // ✅ Convert data URL to file
-      const blob = await fetch(image).then((res) => res.blob());
-      const file = new File([blob], "image.jpg", { type: "image/jpeg" });
-
-      // ✅ Create FormData and send image to backend
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const response = await fetch("https://acne-ai-backend.onrender.com/analyze", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("❌ Failed to analyze image.");
-
-      const result = await response.json();
-      setResult(result);
+      const response = await analyzeImage(image);
+      setResult(response);
     } catch (err) {
       console.error("❌ Error:", err);
       setError("Failed to analyze image. Please try again.");
@@ -58,9 +44,9 @@ function App() {
       <GlobalStyle />
       <Container>
         <Header />
-        <CameraCapture onCapture={analyzeImage} />
-        <ImageUpload onUpload={analyzeImage} />
-        
+        <CameraCapture onCapture={handleAnalyzeImage} />
+        <ImageUpload onUpload={handleAnalyzeImage} />
+
         {isLoading && <Message>⏳ Analyzing image... Please wait.</Message>}
         {error && <Message error>{error}</Message>}
         {result && <ResultDisplay result={result} />}
