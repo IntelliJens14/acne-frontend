@@ -13,6 +13,11 @@ const Container = styled.div`
   text-align: center;
 `;
 
+const Message = styled.p`
+  color: ${({ error }) => (error ? "red" : "blue")};
+  font-weight: bold;
+`;
+
 function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -23,28 +28,25 @@ function App() {
     setError(null);
 
     try {
-      // Convert image to a file (if it's a data URL)
+      // ✅ Convert data URL to file
       const blob = await fetch(image).then((res) => res.blob());
       const file = new File([blob], "image.jpg", { type: "image/jpeg" });
 
-      // Create FormData and append the file
+      // ✅ Create FormData and send image to backend
       const formData = new FormData();
       formData.append("image", file);
 
-      // Send the image to the backend
       const response = await fetch("https://acne-ai-backend.onrender.com/analyze", {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to analyze image.");
-      }
+      if (!response.ok) throw new Error("❌ Failed to analyze image.");
 
       const result = await response.json();
       setResult(result);
     } catch (err) {
-      console.error("Error analyzing image:", err);
+      console.error("❌ Error:", err);
       setError("Failed to analyze image. Please try again.");
     } finally {
       setIsLoading(false);
@@ -58,9 +60,10 @@ function App() {
         <Header />
         <CameraCapture onCapture={analyzeImage} />
         <ImageUpload onUpload={analyzeImage} />
+        
+        {isLoading && <Message>⏳ Analyzing image... Please wait.</Message>}
+        {error && <Message error>{error}</Message>}
         {result && <ResultDisplay result={result} />}
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {isLoading && <p>Analyzing image... Please wait.</p>}
       </Container>
     </>
   );
