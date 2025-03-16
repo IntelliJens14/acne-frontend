@@ -3,7 +3,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { Camera, CameraOff, Circle, XCircle } from "lucide-react";
 import Button from "./Button";
 
-// Styled Components
+// 🎨 Styled Components
 const CameraContainer = styled.div`
   background-color: white;
   border-radius: 0.5rem;
@@ -23,6 +23,7 @@ const ErrorContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-weight: bold;
 `;
 
 const VideoContainer = styled.div`
@@ -38,10 +39,12 @@ const Video = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 0.5rem;
 `;
 
 const PlaceholderText = styled.p`
   color: #6b7280;
+  font-size: 0.9rem;
 `;
 
 const ButtonContainer = styled.div`
@@ -56,13 +59,17 @@ const CameraCapture = ({ onCapture }) => {
   const [error, setError] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
 
-  // Start Camera Stream
+  // 🎥 Start Camera Stream
   const startCamera = async () => {
     try {
       setError(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+      });
       setStream(mediaStream);
-      videoRef.current.srcObject = mediaStream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
       setIsCameraActive(true);
     } catch (err) {
       console.error("❌ Camera access error:", err);
@@ -70,7 +77,7 @@ const CameraCapture = ({ onCapture }) => {
     }
   };
 
-  // Stop Camera Stream
+  // ❌ Stop Camera Stream
   const stopCamera = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -79,7 +86,7 @@ const CameraCapture = ({ onCapture }) => {
     }
   }, [stream]);
 
-  // Capture Image
+  // 📸 Capture Image
   const captureImage = () => {
     if (!videoRef.current) return;
 
@@ -94,7 +101,7 @@ const CameraCapture = ({ onCapture }) => {
     stopCamera();
   };
 
-  // Cleanup when component unmounts
+  // 🔄 Cleanup when component unmounts
   useEffect(() => {
     return () => stopCamera();
   }, [stopCamera]);
@@ -105,13 +112,13 @@ const CameraCapture = ({ onCapture }) => {
 
       {error ? (
         <ErrorContainer>
-          <XCircle className="w-10 h-10 mb-2" />
+          <XCircle size={40} />
           <p>{error}</p>
         </ErrorContainer>
       ) : (
         <VideoContainer>
           {isCameraActive ? (
-            <Video ref={videoRef} autoPlay playsInline />
+            <Video ref={videoRef} autoPlay playsInline aria-label="Camera feed" />
           ) : (
             <div className="flex items-center justify-center h-full">
               <PlaceholderText>Camera preview will appear here</PlaceholderText>
@@ -123,15 +130,15 @@ const CameraCapture = ({ onCapture }) => {
       <ButtonContainer>
         {!isCameraActive ? (
           <Button onClick={startCamera} bgColor="#2563eb" hoverBgColor="#1d4ed8">
-            <Camera className="w-5 h-5 mr-2" /> Start Camera
+            <Camera size={20} style={{ marginRight: "8px" }} /> Start Camera
           </Button>
         ) : (
           <>
             <Button onClick={captureImage} bgColor="#16a34a" hoverBgColor="#15803d">
-              <Circle className="w-5 h-5 mr-2" /> Capture
+              <Circle size={20} style={{ marginRight: "8px" }} /> Capture
             </Button>
             <Button onClick={stopCamera} bgColor="#4b5563" hoverBgColor="#374151">
-              <CameraOff className="w-5 h-5 mr-2" /> Stop Camera
+              <CameraOff size={20} style={{ marginRight: "8px" }} /> Stop Camera
             </Button>
           </>
         )}
