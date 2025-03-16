@@ -1,9 +1,9 @@
-import styled from "styled-components";
 import { useRef, useState, useEffect, useCallback } from "react";
+import styled from "styled-components";
 import { Camera, CameraOff, Circle, XCircle } from "lucide-react";
 import Button from "./Button";
 
-// Styled Components
+// ✅ Styled Components
 const CameraContainer = styled.div`
   background-color: white;
   border-radius: 0.5rem;
@@ -33,10 +33,7 @@ const VideoContainer = styled.div`
   overflow: hidden;
   aspect-ratio: 16 / 9;
   margin-bottom: 1rem;
-
-  @media (max-width: 768px) {
-    aspect-ratio: 4 / 3;
-  }
+  max-width: 100%;
 `;
 
 const Video = styled.video`
@@ -56,27 +53,44 @@ const ButtonContainer = styled.div`
   flex-wrap: wrap;
 `;
 
+// ✅ CameraCapture Component
 const CameraCapture = ({ onCapture }) => {
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [error, setError] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
 
-  // Start Camera Stream
+  // ✅ Start Camera Stream
   const startCamera = async () => {
     try {
       setError(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+
+      // Request camera access
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+      });
+
       setStream(mediaStream);
-      videoRef.current.srcObject = mediaStream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
       setIsCameraActive(true);
     } catch (err) {
       console.error("❌ Camera access error:", err);
-      setError("Camera access denied. Please allow camera permission.");
+
+      if (err.name === "NotAllowedError") {
+        setError("Camera access denied. Please allow permissions in browser settings.");
+      } else if (err.name === "NotFoundError") {
+        setError("No camera found. Please check your device.");
+      } else if (err.name === "NotReadableError") {
+        setError("Camera is already in use by another application.");
+      } else {
+        setError("Failed to access the camera. Try again.");
+      }
     }
   };
 
-  // Stop Camera Stream
+  // ✅ Stop Camera Stream
   const stopCamera = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -85,7 +99,7 @@ const CameraCapture = ({ onCapture }) => {
     }
   }, [stream]);
 
-  // Capture Image
+  // ✅ Capture Image
   const captureImage = () => {
     if (!videoRef.current) return;
 
@@ -100,7 +114,7 @@ const CameraCapture = ({ onCapture }) => {
     stopCamera();
   };
 
-  // Cleanup when component unmounts
+  // ✅ Cleanup when component unmounts
   useEffect(() => {
     return () => stopCamera();
   }, [stopCamera]);
@@ -111,7 +125,7 @@ const CameraCapture = ({ onCapture }) => {
 
       {error ? (
         <ErrorContainer>
-          <XCircle className="w-10 h-10 mb-2" />
+          <XCircle size={40} className="mb-2" />
           <p>{error}</p>
         </ErrorContainer>
       ) : (
@@ -129,15 +143,15 @@ const CameraCapture = ({ onCapture }) => {
       <ButtonContainer>
         {!isCameraActive ? (
           <Button onClick={startCamera} bgColor="#2563eb" hoverBgColor="#1d4ed8">
-            <Camera className="w-5 h-5 mr-2" /> Start Camera
+            <Camera size={20} className="mr-2" /> Start Camera
           </Button>
         ) : (
           <>
             <Button onClick={captureImage} bgColor="#16a34a" hoverBgColor="#15803d">
-              <Circle className="w-5 h-5 mr-2" /> Capture
+              <Circle size={20} className="mr-2" /> Capture
             </Button>
             <Button onClick={stopCamera} bgColor="#4b5563" hoverBgColor="#374151">
-              <CameraOff className="w-5 h-5 mr-2" /> Stop Camera
+              <CameraOff size={20} className="mr-2" /> Stop Camera
             </Button>
           </>
         )}
