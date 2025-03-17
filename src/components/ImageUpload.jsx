@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Upload, Trash2, Image as ImageIcon, AlertCircle } from "lucide-react";
-import Button from "./Button";
 import styled from "styled-components";
+import Button from "./Button";
 
-// Styled Components
+// ✅ Styled Components
 const UploadContainer = styled.div`
   background-color: white;
   border-radius: 0.5rem;
@@ -17,12 +17,18 @@ const UploadContainer = styled.div`
   &:hover {
     border-color: #3b82f6;
   }
+
+  /* ✅ Mobile Responsive */
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const Title = styled.h2`
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
+  color: #374151;
 `;
 
 const ErrorContainer = styled.div`
@@ -30,6 +36,7 @@ const ErrorContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9rem;
   margin-bottom: 0.5rem;
 `;
 
@@ -38,6 +45,8 @@ const ImagePreview = styled.img`
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  object-fit: cover;
+  max-height: 300px;
 `;
 
 const UploadLabel = styled.label`
@@ -45,10 +54,12 @@ const UploadLabel = styled.label`
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 1rem;
 `;
 
 const UploadText = styled.p`
   color: #6b7280;
+  font-size: 0.9rem;
 `;
 
 const HiddenInput = styled.input`
@@ -73,13 +84,14 @@ const ImageUpload = ({ onUpload }) => {
   const validateAndSetFile = (file) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setError("Only image files are allowed.");
+      setError("❌ Only image files are allowed.");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError("File size must be under 5MB.");
+      setError("⚠️ File size must be under 5MB.");
       return;
     }
+
     const reader = new FileReader();
     reader.onload = () => {
       setSelectedFile(reader.result);
@@ -96,32 +108,32 @@ const ImageUpload = ({ onUpload }) => {
 
   return (
     <UploadContainer onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
-      <Title>Upload an Image</Title>
+      <Title>📸 Upload an Image</Title>
 
       {error && (
         <ErrorContainer>
-          <AlertCircle className="w-5 h-5 mr-2" />
+          <AlertCircle size={18} style={{ marginRight: "6px" }} />
           {error}
         </ErrorContainer>
       )}
 
       {selectedFile ? (
         <div>
-          <ImagePreview src={selectedFile} alt="Uploaded" />
-          <Button onClick={removeImage} bgColor="#374151" hoverBgColor="#1f2937">
-            <Trash2 className="w-5 h-5 mr-2" />
+          <ImagePreview src={selectedFile} alt="Uploaded preview" />
+          <Button onClick={removeImage}>
+            <Trash2 size={18} style={{ marginRight: "6px" }} />
             Remove Image
           </Button>
         </div>
       ) : (
         <>
           <UploadLabel>
-            <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
+            <ImageIcon size={48} style={{ color: "#9ca3af", marginBottom: "8px" }} />
             <UploadText>Drag & Drop or Click to Upload</UploadText>
             <HiddenInput type="file" accept="image/*" onChange={handleFileChange} />
           </UploadLabel>
-          <Button bgColor="#3b82f6" hoverBgColor="#2563eb" className="mt-4 flex items-center">
-            <Upload className="w-5 h-5 mr-2" />
+          <Button>
+            <Upload size={18} style={{ marginRight: "6px" }} />
             Choose File
           </Button>
         </>
