@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import styled from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
 import Header from "./components/Header";
 import CameraCapture from "./components/CameraCapture";
@@ -30,6 +30,12 @@ const Message = styled.p`
   }
 `;
 
+// ✅ Theme Object for Styled Components
+const theme = {
+  bodyBg: "#f7fafc",
+  textColor: "#1a202c",
+};
+
 function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -52,7 +58,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <GlobalStyle />
       <Container>
         <Header />
@@ -60,11 +66,19 @@ function App() {
         <ImageUpload onUpload={handleAnalyzeImage} />
 
         {/* ✅ Improved Error/Loading Messages */}
-        {isLoading && <Message aria-live="polite">⏳ Analyzing image... Please wait.</Message>}
-        {error && <Message error aria-live="assertive">{error}</Message>}
+        {isLoading && (
+          <Message aria-live="polite">
+            ⏳ Analyzing image... Please wait.
+          </Message>
+        )}
+        {error && (
+          <Message error aria-live="assertive">
+            {error}
+          </Message>
+        )}
         {result && <ResultDisplay result={result} />}
       </Container>
-    </>
+    </ThemeProvider>
   );
 }
 
