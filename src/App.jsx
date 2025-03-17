@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import styled from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
 import Header from "./components/Header";
@@ -20,7 +20,7 @@ const Container = styled.div`
 `;
 
 const Message = styled.p`
-  color: ${({ error }) => (error ? "#DC2626" : "#2563EB")}; 
+  color: ${({ error }) => (error ? "#DC2626" : "#2563EB")};
   font-weight: bold;
   margin-top: 1rem;
   font-size: 1rem;
@@ -35,11 +35,11 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ Handles both image capture & upload
-  const handleAnalyzeImage = async (image) => {
+  // ✅ Optimized function using useCallback to prevent unnecessary re-renders
+  const handleAnalyzeImage = useCallback(async (image) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await analyzeImage(image);
       setResult(response);
@@ -49,7 +49,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   return (
     <>
@@ -60,12 +60,8 @@ function App() {
         <ImageUpload onUpload={handleAnalyzeImage} />
 
         {/* ✅ Improved Error/Loading Messages */}
-        {isLoading && (
-          <Message aria-live="polite">⏳ Analyzing image... Please wait.</Message>
-        )}
-        {error && (
-          <Message error aria-live="assertive">{error}</Message>
-        )}
+        {isLoading && <Message aria-live="polite">⏳ Analyzing image... Please wait.</Message>}
+        {error && <Message error aria-live="assertive">{error}</Message>}
         {result && <ResultDisplay result={result} />}
       </Container>
     </>
