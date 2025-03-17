@@ -30,6 +30,27 @@ const Message = styled.p`
   }
 `;
 
+const Button = styled.button`
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #2563eb;
+  color: #fff;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background-color: #1e40af;
+  }
+
+  &:disabled {
+    background-color: #a3bffa;
+    cursor: not-allowed;
+  }
+`;
+
 // ✅ Theme Object for Styled Components
 const theme = {
   bodyBg: "#f7fafc",
@@ -45,6 +66,7 @@ function App() {
   const handleAnalyzeImage = useCallback(async (image) => {
     setIsLoading(true);
     setError(null);
+    setResult(null);
 
     try {
       const response = await analyzeImage(image);
@@ -66,17 +88,19 @@ function App() {
         <ImageUpload onUpload={handleAnalyzeImage} />
 
         {/* ✅ Improved Error/Loading Messages */}
-        {isLoading && (
-          <Message aria-live="polite">
-            ⏳ Analyzing image... Please wait.
-          </Message>
-        )}
-        {error && (
-          <Message error aria-live="assertive">
-            {error}
-          </Message>
-        )}
+        {isLoading && <Message aria-live="polite">⏳ Analyzing image... Please wait.</Message>}
+        {error && <Message error aria-live="assertive">{error}</Message>}
         {result && <ResultDisplay result={result} />}
+
+        {/* ✅ Reset Button for User Convenience */}
+        {(error || result) && (
+          <Button onClick={() => {
+            setResult(null);
+            setError(null);
+          }}>
+            🔄 Reset
+          </Button>
+        )}
       </Container>
     </ThemeProvider>
   );
