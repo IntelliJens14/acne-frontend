@@ -33,21 +33,16 @@ const Message = styled.p`
 const Button = styled.button`
   margin-top: 1.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #2563eb;
+  background-color: ${({ disabled }) => (disabled ? "#a3bffa" : "#2563eb")};
   color: #fff;
   font-size: 1rem;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: background 0.3s ease;
 
   &:hover {
-    background-color: #1e40af;
-  }
-
-  &:disabled {
-    background-color: #a3bffa;
-    cursor: not-allowed;
+    background-color: ${({ disabled }) => (disabled ? "#a3bffa" : "#1e40af")};
   }
 `;
 
@@ -79,6 +74,12 @@ function App() {
     }
   }, []);
 
+  // ✅ Reset Handler
+  const handleReset = () => {
+    setResult(null);
+    setError(null);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -94,10 +95,7 @@ function App() {
 
         {/* ✅ Reset Button for User Convenience */}
         {(error || result) && (
-          <Button onClick={() => {
-            setResult(null);
-            setError(null);
-          }}>
+          <Button onClick={handleReset}>
             🔄 Reset
           </Button>
         )}
