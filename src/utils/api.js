@@ -1,3 +1,5 @@
+const BACKEND_URL = "https://acne-ai-backend-2nmn.onrender.com"; // ✅ Fixed Render Backend URL
+
 export const analyzeImage = async (image) => {
     try {
         // ✅ Ensure valid image input
@@ -5,30 +7,31 @@ export const analyzeImage = async (image) => {
             throw new Error("❌ No image provided.");
         }
 
-        // ✅ Convert URL/File input to Blob if needed
         let file;
+
+        // ✅ Handle URL-based image conversion
         if (typeof image === "string") {
-            const blob = await fetch(image).then((res) => {
-                if (!res.ok) {
-                    throw new Error(`❌ Failed to fetch image: ${res.statusText}`);
+            try {
+                const response = await fetch(image);
+                if (!response.ok) {
+                    throw new Error(`❌ Failed to fetch image: ${response.statusText}`);
                 }
-                return res.blob();
-            });
-            file = new File([blob], "image.jpg", { type: "image/jpeg" });
+                const blob = await response.blob();
+                file = new File([blob], "image.jpg", { type: blob.type || "image/jpeg" });
+            } catch (fetchError) {
+                throw new Error("❌ Error fetching image from URL.");
+            }
         } else if (image instanceof File) {
             file = image;
         } else {
             throw new Error("❌ Invalid image format.");
         }
 
-        // ✅ Prepare form data
+        // ✅ Prepare FormData
         const formData = new FormData();
         formData.append("image", file);
 
-        // ✅ Backend URL from .env (Fallback if missing)
-        const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://acne-ai-backend.onrender.com";
-
-        // ✅ Fetch API with error handling
+        // ✅ Send request to the backend
         const response = await fetch(`${BACKEND_URL}/analyze`, {
             method: "POST",
             body: formData,
@@ -39,7 +42,7 @@ export const analyzeImage = async (image) => {
             throw new Error(`❌ Failed to analyze image: ${errorText}`);
         }
 
-        return response.json();
+        return await response.json();
     } catch (error) {
         console.error("❌ API Error:", error.message || error);
         throw error;
