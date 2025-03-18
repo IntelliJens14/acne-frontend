@@ -1,14 +1,16 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, lazy, Suspense } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
-import Header from "./components/Header";
-import CameraCapture from "./components/CameraCapture";
-import ImageUpload from "./components/ImageUpload";
-import ResultDisplay from "./components/ResultDisplay";
 import { analyzeImage } from "./utils/api"; // ✅ Optimized API function
 
+// ✅ Lazy-loaded components for performance boost
+const Header = lazy(() => import("./components/Header"));
+const CameraCapture = lazy(() => import("./components/CameraCapture"));
+const ImageUpload = lazy(() => import("./components/ImageUpload"));
+const ResultDisplay = lazy(() => import("./components/ResultDisplay"));
+
 // ✅ Styled Components
-const Container = styled.div`
+const Container = styled.main`
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
@@ -24,6 +26,7 @@ const Message = styled.p`
   font-weight: bold;
   margin-top: 1rem;
   font-size: 1rem;
+  transition: opacity 0.3s ease-in-out;
 
   @media (max-width: 480px) {
     font-size: 0.9rem;
@@ -39,10 +42,16 @@ const Button = styled.button`
   border: none;
   border-radius: 5px;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
+  outline: none;
 
   &:hover {
     background-color: ${({ disabled }) => (disabled ? "#a3bffa" : "#1e40af")};
+    transform: ${({ disabled }) => (disabled ? "none" : "scale(1.05)")};
+  }
+
+  &:focus {
+    outline: 2px solid #1e40af;
   }
 `;
 
@@ -84,18 +93,22 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <Container>
-        <Header />
-        <CameraCapture onCapture={handleAnalyzeImage} />
-        <ImageUpload onUpload={handleAnalyzeImage} />
+        <Suspense fallback={<Message>⏳ Loading components...</Message>}>
+          <Header />
+          <CameraCapture onCapture={handleAnalyzeImage} />
+          <ImageUpload onUpload={handleAnalyzeImage} />
+        </Suspense>
 
         {/* ✅ Improved Error/Loading Messages */}
         {isLoading && <Message aria-live="polite">⏳ Analyzing image... Please wait.</Message>}
         {error && <Message error aria-live="assertive">{error}</Message>}
-        {result && <ResultDisplay result={result} />}
+        {result && (
+          <ResultDisplay result={result} />
+        )}
 
         {/* ✅ Reset Button for User Convenience */}
         {(error || result) && (
-          <Button onClick={handleReset}>
+          <Button onClick={handleReset} aria-label="Reset Analysis">
             🔄 Reset
           </Button>
         )}
