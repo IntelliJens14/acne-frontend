@@ -61,35 +61,29 @@ const CameraCapture = ({ onCapture }) => {
   const [error, setError] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
 
+  // ✅ Handle Camera Errors
+  const handleCameraError = (err) => {
+    console.error("❌ Camera error:", err);
+    const errorMessages = {
+      NotAllowedError: "Camera access denied. Please allow permissions in browser settings.",
+      NotFoundError: "No camera found. Please check your device.",
+      NotReadableError: "Camera is already in use by another application.",
+    };
+    setError(errorMessages[err.name] || "Failed to access the camera. Try again.");
+  };
+
   // ✅ Start Camera Stream
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     try {
       setError(null);
-
-      // Request camera access
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
-      });
-
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
       setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
+      if (videoRef.current) videoRef.current.srcObject = mediaStream;
       setIsCameraActive(true);
     } catch (err) {
-      console.error("❌ Camera access error:", err);
-
-      if (err.name === "NotAllowedError") {
-        setError("Camera access denied. Please allow permissions in browser settings.");
-      } else if (err.name === "NotFoundError") {
-        setError("No camera found. Please check your device.");
-      } else if (err.name === "NotReadableError") {
-        setError("Camera is already in use by another application.");
-      } else {
-        setError("Failed to access the camera. Try again.");
-      }
+      handleCameraError(err);
     }
-  };
+  }, []);
 
   // ✅ Stop Camera Stream
   const stopCamera = useCallback(() => {
@@ -103,26 +97,17 @@ const CameraCapture = ({ onCapture }) => {
   // ✅ Capture Image
   const captureImage = () => {
     if (!videoRef.current) return;
-
     const canvas = document.createElement("canvas");
     canvas.width = 224;
     canvas.height = 224;
     const ctx = canvas.getContext("2d");
     ctx.drawImage(videoRef.current, 0, 0, 224, 224);
-
-    const imageDataUrl = canvas.toDataURL("image/jpeg");
-    onCapture(imageDataUrl);
+    onCapture(canvas.toDataURL("image/jpeg"));
     stopCamera();
   };
 
-  // ✅ Check for permissions and start camera if already granted
+  // ✅ Cleanup on Unmount
   useEffect(() => {
-    navigator.permissions.query({ name: "camera" }).then((permissionStatus) => {
-      if (permissionStatus.state === "granted") {
-        startCamera();
-      }
-    });
-
     return () => stopCamera();
   }, [stopCamera]);
 

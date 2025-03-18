@@ -69,21 +69,35 @@ const severityLevels = [
 ];
 
 const ResultDisplay = ({ image, result, isLoading, error, onReset }) => {
-  return (
-    <ResultContainer>
-      <Title>Analysis Result</Title>
-
-      {isLoading ? (
+  if (isLoading) {
+    return (
+      <ResultContainer>
+        <Title>Analysis Result</Title>
         <LoadingContainer>
           <Loader2 className="w-12 h-12 animate-spin" />
           <p className="mt-2">Analyzing image...</p>
         </LoadingContainer>
-      ) : error ? (
+      </ResultContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <ResultContainer>
+        <Title>Analysis Result</Title>
         <ErrorContainer>
           <XCircle className="w-10 h-10 mb-2" />
           <p>{error}</p>
         </ErrorContainer>
-      ) : result ? (
+      </ResultContainer>
+    );
+  }
+
+  return (
+    <ResultContainer>
+      <Title>Analysis Result</Title>
+
+      {result && (
         <>
           <Image src={image} alt="Uploaded" />
 
@@ -105,7 +119,7 @@ const ResultDisplay = ({ image, result, isLoading, error, onReset }) => {
             </WarningContainer>
           )}
         </>
-      ) : null}
+      )}
 
       <Button onClick={onReset} className="mt-6 flex items-center bg-gray-700 hover:bg-gray-900">
         <RefreshCw className="w-5 h-5 mr-2" />
