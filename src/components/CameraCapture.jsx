@@ -40,6 +40,7 @@ const Video = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 0.5rem;
 `;
 
 const PlaceholderText = styled.p`
@@ -114,8 +115,14 @@ const CameraCapture = ({ onCapture }) => {
     stopCamera();
   };
 
-  // ✅ Cleanup when component unmounts
+  // ✅ Check for permissions and start camera if already granted
   useEffect(() => {
+    navigator.permissions.query({ name: "camera" }).then((permissionStatus) => {
+      if (permissionStatus.state === "granted") {
+        startCamera();
+      }
+    });
+
     return () => stopCamera();
   }, [stopCamera]);
 
@@ -131,7 +138,7 @@ const CameraCapture = ({ onCapture }) => {
       ) : (
         <VideoContainer>
           {isCameraActive ? (
-            <Video ref={videoRef} autoPlay playsInline />
+            <Video ref={videoRef} autoPlay playsInline muted />
           ) : (
             <div className="flex items-center justify-center h-full">
               <PlaceholderText>Camera preview will appear here</PlaceholderText>
