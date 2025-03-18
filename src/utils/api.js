@@ -26,7 +26,7 @@ export const analyzeImage = async (image) => {
         formData.append("image", file);
 
         // ✅ Backend URL from .env (Fallback if missing)
-        const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://acne-ai-backend.onrender.com";
+        const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://acne-ai-backend-2nmn.onrender.com";
 
         // ✅ Fetch API with error handling
         const response = await fetch(`${BACKEND_URL}/analyze`, {
