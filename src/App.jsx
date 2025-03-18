@@ -1,9 +1,9 @@
 import React, { useState, useCallback, lazy, Suspense } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
-import { analyzeImage } from "./utils/api"; // ✅ Optimized API function
+import { analyzeImage } from "./utils/api"; // ✅ Optimized API call
 
-// ✅ Lazy-loaded components for performance boost
+// ✅ Lazy-loaded components for performance
 const Header = lazy(() => import("./components/Header"));
 const CameraCapture = lazy(() => import("./components/CameraCapture"));
 const ImageUpload = lazy(() => import("./components/ImageUpload"));
@@ -66,6 +66,9 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // ✅ Updated Backend URL
+  const BACKEND_URL = "https://acne-ai-backend-2nmn.onrender.com";
+
   // ✅ Optimized function using useCallback to prevent unnecessary re-renders
   const handleAnalyzeImage = useCallback(async (image) => {
     setIsLoading(true);
@@ -73,7 +76,7 @@ function App() {
     setResult(null);
 
     try {
-      const response = await analyzeImage(image);
+      const response = await analyzeImage(image, BACKEND_URL); // ✅ Pass backend URL dynamically
       setResult(response);
     } catch (err) {
       console.error("❌ Error:", err);

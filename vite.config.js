@@ -1,24 +1,24 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "node:path"; // ✅ Use `node:path` for compatibility
+import react from "@vitejs/plugin-react-swc"; // ✅ Faster React compilation
+import path from "node:path";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"), // ✅ Allows importing with "@/components"
+      "@": path.resolve(__dirname, "src"), // ✅ Allows `@/components` imports
     },
   },
 
   server: {
-    port: 5173, // ✅ Change port if needed
-    open: true, // ✅ Auto-opens browser on `npm run dev`
-    cors: true, // ✅ Allow frontend to communicate with APIs
+    port: 5173,
+    open: mode === "development", // ✅ Auto-opens in dev, not in prod
+    cors: true,
 
     proxy: {
       "/api": {
-        target: "https://acne-ai-backend.onrender.com",
+        target: "https://acne-ai-backend-2nmn.onrender.com", // ✅ Your backend URL
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
@@ -27,11 +27,11 @@ export default defineConfig({
   },
 
   build: {
-    outDir: "dist", // ✅ Ensures correct output directory
-    sourcemap: true, // ✅ Useful for debugging
+    outDir: "dist",
+    sourcemap: mode === "development", // ✅ Only enable sourcemaps in dev
   },
 
   define: {
-    "process.env": {}, // ✅ Ensures environment variables work in Vite
+    "process.env": process.env, // ✅ Fix environment variable issues
   },
-});
+}));
