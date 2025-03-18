@@ -47,7 +47,7 @@ const Button = styled.button`
 
   &:hover {
     background-color: ${({ disabled }) => (disabled ? "#a3bffa" : "#1e40af")};
-    transform: ${({ disabled }) => (disabled ? "none" : "scale(1.05)")};
+    transform: ${({ disabled }) => (disabled ? "none" : "scale(1.05)");
   }
 
   &:focus {
