@@ -99,7 +99,7 @@ const AcneSeverityDetector = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState(null); // Add state for result
+  const [result, setResult] = useState(null);
   const videoRef = useRef(null);
 
   // Start Camera
@@ -111,7 +111,8 @@ const AcneSeverityDetector = () => {
       }
       setCameraActive(true);
       setError(null);
-    } catch {
+    } catch (err) {
+      console.error("Error accessing camera:", err);
       setError("Camera access denied. Please allow camera permissions.");
       setCameraActive(false);
     }

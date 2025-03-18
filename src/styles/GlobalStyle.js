@@ -1,4 +1,3 @@
-// GlobalStyle.js
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
@@ -8,7 +7,8 @@ const GlobalStyle = createGlobalStyle`
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #f7fafc;
+    background-color: ${({ theme }) => theme?.bodyBg || "#f7fafc"}; /* ✅ Safe fallback */
+    color: ${({ theme }) => theme?.textColor || "#1a202c"}; /* ✅ Safe fallback */
   }
 
   img {

@@ -4,23 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <!-- SEO Optimization -->
+  <!-- ✅ SEO Optimization -->
   <meta name="description" content="AI-powered Acne Severity Detector - Upload or capture an image to analyze acne severity using deep learning." />
   <meta name="keywords" content="AI, Acne Detection, Skin Analysis, Machine Learning, TensorFlow.js" />
-  <meta name="author" content="Your Name or Team" />
+  <meta name="author" content="Pangandaman et.al" />
 
-  <!-- Open Graph Meta Tags (For better link previews on social media) -->
+  <!-- ✅ Open Graph Meta Tags (For better link previews on social media) -->
   <meta property="og:title" content="Acne Severity Detector" />
   <meta property="og:description" content="Analyze acne severity using AI-powered technology with TensorFlow.js." />
-  <meta property="og:image" content="/preview-image.jpg" />  <!-- Ensure preview image exists in public/ -->
-  <meta property="og:url" content="https://yourwebsite.com/" />
+  <meta property="og:image" content="/public/preview-image.jpg" /> <!-- Ensure `preview-image.jpg` is inside `public/` -->
+  <meta property="og:url" content="acneseverityai.netlify.app" />
   <meta property="og:type" content="website" />
 
-  <!-- Twitter Card -->
+  <!-- ✅ Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Acne Severity Detector" />
   <meta name="twitter:description" content="Upload or capture an image to analyze acne severity using deep learning." />
-  <meta name="twitter:image" content="/preview-image.jpg" />
+  <meta name="twitter:image" content="/public/preview-image.jpg" />
 
   <title>Acne Severity Detector</title>
 
@@ -30,12 +30,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- ✅ Ensure Favicon is Found (Place `favicon.ico` inside `public/`) -->
-  <link rel="icon" type="image/png" href="/favicon.ico" />
+  <link rel="icon" type="image/png" href="/public/favicon.ico" />
 
-  <!-- ✅ Preload CSS for faster rendering -->
-  <link rel="stylesheet" href="/src/index.css" />
+  <!-- ✅ Load Global Styles (Replace `index.css` with Styled Components `GlobalStyle.js`) -->
+  <script type="module">
+    import "/src/styles/GlobalStyle.js";
+  </script>
 </head>
-<body class="bg-gray-50 text-gray-900 font-inter">
+<body>
   <div id="root"></div>
   
   <!-- ✅ Load React App -->

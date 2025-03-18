@@ -1,12 +1,10 @@
-// src/main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import GlobalStyle from "./styles/GlobalStyle"; // Correct import path
+import "./index.css"; // ✅ Import to prevent missing file errors
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <GlobalStyle />
     <App />
   </React.StrictMode>
 );
