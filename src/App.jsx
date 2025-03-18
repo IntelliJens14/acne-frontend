@@ -1,29 +1,32 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 // Import components
-import Header from './components/Header'
-import CameraCapture from './components/CameraCapture'
-import ImageUpload from './components/ImageUpload'
-import ResultDisplay from './components/ResultDisplay'
+import Header from "./components/Header";
+import CameraCapture from "./components/CameraCapture";
+import ImageUpload from "./components/ImageUpload";
+import ResultDisplay from "./components/ResultDisplay";
 
 // Import global styles
-import './index.css'
+import "./index.css";
 
 const App = () => {
+  const [uploadedImage, setUploadedImage] = useState(null);
+
   return (
     <Router>
       <div className="app-container">
-        <Header /> {/* ✅ Now used */}
+        <Header />
         <main className="content">
           <Routes>
-            <Route path="/" element={<ImageUpload />} />  {/* ✅ Now used */}
-            <Route path="/camera" element={<CameraCapture />} />  {/* ✅ Now used */}
-            <Route path="/results" element={<ResultDisplay />} />  {/* ✅ Now used */}
+            <Route path="/" element={<ImageUpload onUpload={setUploadedImage} />} />
+            <Route path="/camera" element={<CameraCapture />} />
+            <Route path="/results" element={<ResultDisplay image={uploadedImage} />} />
           </Routes>
         </main>
       </div>
     </Router>
-  )
-}
+  );
+};
 
-export default App
+export default App;
