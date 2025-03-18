@@ -3,12 +3,14 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "homepage": ".", 
   "scripts": {
     "dev": "vite --open", 
     "build": "vite build",
     "lint": "eslint . --fix",
-    "preview": "vite preview",
-    "analyze": "vite build --mode analyze" 
+    "preview": "vite preview --port=3000", 
+    "start": "vite preview --port=3000", 
+    "analyze": "vite build --mode analyze"
   },
   "dependencies": {
     "@shadcn/ui": "^0.0.4",
@@ -21,11 +23,12 @@
     "styled-components": "^6.1.15"
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.0.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.5",
-    "eslint": "^9.22.0",
+    "@vitejs/plugin-react-swc": "^4.0.2",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^5.1.0",
@@ -38,5 +41,8 @@
     "rules": {
       "react/prop-types": "off"
     }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
