@@ -1,9 +1,9 @@
-// File: App.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Camera, Upload, XCircle } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 
+// Styled Components
 const Container = styled.div`
   max-width: 500px;
   width: 100%;
@@ -175,6 +175,7 @@ const ModelInfo = styled.div`
   text-align: center;
 `;
 
+// Main App Component
 function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState(false);
@@ -194,23 +195,26 @@ function App() {
   const INPUT_SIZE = 224;
   const INPUT_SHAPE = [INPUT_SIZE, INPUT_SIZE, 3];
 
-  // Initialize TensorFlow model
+  // Load TensorFlow.js model
   useEffect(() => {
     async function loadModel() {
       try {
         setModelLoading(true);
         setModelError(null);
-        console.log("Loading model...");
         
-        // Use the path to your model.json file
+        // Check for WebGL support
+        if (!tf.engine().backend || !tf.engine().backend.isGPUBackend) {
+          throw new Error("WebGL is not supported in this browser. Please use a browser with WebGL support.");
+        }
+        
+        console.log("Loading model...");
         const modelPath = 'model.json';
         const loadedModel = await tf.loadGraphModel(modelPath);
-        
         setModel(loadedModel);
         console.log("Model loaded successfully");
       } catch (error) {
         console.error("Failed to load model:", error);
-        setModelError("Failed to load the AI model. Please check if model files are correctly placed.");
+        setModelError(error.message);
       } finally {
         setModelLoading(false);
       }
@@ -218,6 +222,7 @@ function App() {
     loadModel();
   }, []);
 
+  // Start camera
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -240,6 +245,7 @@ function App() {
     }
   };
 
+  // Stop camera
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
@@ -249,10 +255,10 @@ function App() {
     setCapturedImage(null);
   };
 
+  // Capture image from camera
   const captureImage = () => {
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
-      // Set canvas dimensions to match the input size
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
       canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
@@ -262,6 +268,7 @@ function App() {
     }
   };
 
+  // Handle file upload
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -269,7 +276,6 @@ function App() {
       reader.onloadend = () => {
         setUploadedImage(reader.result);
         
-        // Create an image element to get dimensions for canvas
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
@@ -284,45 +290,17 @@ function App() {
     }
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result);
-        
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          canvas.getContext('2d').drawImage(img, 0, 0);
-          analyzeImage(canvas);
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  // Preprocess image for model input
   const preprocessImage = (imageCanvas) => {
-    // Create a canvas with the exact size required by the model
     const modelCanvas = document.createElement('canvas');
     modelCanvas.width = INPUT_SIZE;
     modelCanvas.height = INPUT_SIZE;
     const ctx = modelCanvas.getContext('2d');
     
-    // Draw the image centered and cropped to the model canvas
     const origImage = imageCanvas;
     const origWidth = origImage.width;
     const origHeight = origImage.height;
     
-    // Calculate scaling and position to center-crop
     let scale, offsetX, offsetY;
     if (origWidth > origHeight) {
       scale = INPUT_SIZE / origHeight;
@@ -334,7 +312,6 @@ function App() {
       offsetY = (origHeight * scale - INPUT_SIZE) / 2;
     }
     
-    // Draw the image centered and cropped
     ctx.drawImage(
       origImage, 
       -offsetX / scale, 
@@ -347,48 +324,40 @@ function App() {
       INPUT_SIZE
     );
     
-    // Get image data
     const imageData = ctx.getImageData(0, 0, INPUT_SIZE, INPUT_SIZE);
-    
-    // Create a Float32Array for RGB values
     const pixels = new Float32Array(INPUT_SIZE * INPUT_SIZE * 3);
     
-    // Convert to RGB values normalized to [0, 1]
     for (let i = 0; i < imageData.data.length / 4; i++) {
       pixels[i * 3] = imageData.data[i * 4] / 255;     // R
       pixels[i * 3 + 1] = imageData.data[i * 4 + 1] / 255; // G
       pixels[i * 3 + 2] = imageData.data[i * 4 + 2] / 255; // B
     }
     
-    // Create and return the tensor with shape [1, 224, 224, 3]
     return tf.tensor(pixels, [1, INPUT_SIZE, INPUT_SIZE, 3]);
   };
 
+  // Analyze image using the model
   const analyzeImage = async (canvas) => {
     setIsLoading(true);
     
     try {
-      // If you have a real model loaded, use it here
       if (model) {
         console.log("Using loaded model for inference");
         
-        // Preprocess the image for the model
         const inputTensor = preprocessImage(canvas);
-        
-        // Run inference
         const predictions = await model.predict(inputTensor);
-        
-        // Process the model output
         const resultsArray = await predictions.data();
         
-        // Clean up tensors
         inputTensor.dispose();
         predictions.dispose();
         
-        // Find the highest probability class
         const maxIndex = resultsArray.indexOf(Math.max(...resultsArray));
+        const confidence = resultsArray[maxIndex];
         
-        // Map the result to your severity levels
+        if (confidence < 0.7) {
+          throw new Error("Low confidence in prediction. Please try again with a clearer image.");
+        }
+        
         const severityLevels = [
           { level: 0, name: 'Extremely Mild' },
           { level: 1, name: 'Mild' },
@@ -397,19 +366,15 @@ function App() {
         ];
         
         const severity = severityLevels[maxIndex];
-        const confidence = (resultsArray[maxIndex] * 100).toFixed(1);
         
         setAnalysisResult({
           severity: severity.name,
           level: severity.level,
-          confidence: confidence + '%',
+          confidence: (confidence * 100).toFixed(1) + '%',
           recommendations: getRecommendations(severity.level)
         });
       } else {
-        // Fallback if model isn't loaded - simulated results
         console.log("Using simulated results as model is not loaded");
-        
-        // Simulate processing time
         await new Promise(resolve => setTimeout(resolve, 1500));
         
         const severityLevels = [0, 1, 2, 3];
@@ -427,13 +392,14 @@ function App() {
     } catch (error) {
       console.error("Analysis failed:", error);
       setAnalysisResult({
-        error: "Analysis failed. Please try again with a clearer image."
+        error: error.message
       });
     }
     
     setIsLoading(false);
   };
-  
+
+  // Get recommendations based on severity level
   const getRecommendations = (level) => {
     switch(level) {
       case 0: // Extremely Mild
@@ -466,6 +432,7 @@ function App() {
     }
   };
 
+  // Reset analysis
   const resetAnalysis = () => {
     setCapturedImage(null);
     setUploadedImage(null);
@@ -528,8 +495,13 @@ function App() {
             <SectionTitle>Upload an Image</SectionTitle>
             <UploadArea 
               onClick={() => fileInputRef.current.click()}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                  handleFileUpload({ target: { files: e.dataTransfer.files } });
+                }
+              }}
             >
               <Upload size={48} color="#888" />
               <UploadText>Drag & Drop or Click to Upload</UploadText>
