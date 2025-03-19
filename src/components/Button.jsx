@@ -1,48 +1,160 @@
+import { useRef, useState } from "react";
+import { Upload, Trash2, Image as ImageIcon, AlertCircle } from "lucide-react";
 import styled from "styled-components";
+import Button from "./Button";
 
-const StyledButton = styled.button`
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  background-color: ${({ theme }) => theme.primary || "#3b82f6"};
-  color: ${({ theme }) => theme.buttonText || "white"};
-  font-weight: bold;
+// ✅ Styled Components
+const UploadContainer = styled.div`
+  background-color: white;
   border-radius: 0.5rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  width: 100%;
-  max-width: 220px;
-  display: inline-block;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
   text-align: center;
+  border: 2px dashed #d1d5db;
+  transition: border-color 0.2s ease-in-out;
+  cursor: pointer;
 
   &:hover {
-    background-color: ${({ theme }) => theme.primaryHover || "#1d4ed8"};
-    transform: scale(1.05);
-  }
-
-  &:active {
-    background-color: ${({ theme }) => theme.primaryActive || "#1e40af"};
-    transform: scale(0.98);
-  }
-
-  &:focus {
-    outline: 2px solid ${({ theme }) => theme.focusColor || "#60a5fa"};
+    border-color: #3b82f6;
   }
 
   /* ✅ Mobile Responsive */
   @media (max-width: 480px) {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-    max-width: 180px;
+    padding: 1rem;
   }
 `;
 
-const Button = ({ children, onClick, type = "button" }) => {
+const Title = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #374151;
+`;
+
+const ErrorContainer = styled.div`
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+`;
+
+const ImagePreview = styled.img`
+  width: 100%;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  object-fit: cover;
+  max-height: 300px;
+`;
+
+const UploadLabel = styled.label`
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+`;
+
+const UploadText = styled.p`
+  color: #6b7280;
+  font-size: 0.9rem;
+`;
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
+const ImageUpload = ({ onUpload }) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [error, setError] = useState(null);
+  const fileInputRef = useRef(null); // ✅ Use a ref to access the file input
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    validateAndSetFile(file);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    validateAndSetFile(file);
+  };
+
+  const validateAndSetFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("❌ Only image files are allowed.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("⚠️ File size must be under 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      console.log("FileReader result:", reader.result);
+      setSelectedFile(reader.result);
+      if (typeof onUpload === "function") {
+        onUpload(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    setError(null);
+  };
+
+  const removeImage = () => {
+    setSelectedFile(null);
+    setError(null);
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // ✅ Programmatically trigger file selection
+    }
+  };
+
   return (
-    <StyledButton onClick={onClick} type={type}>
-      {children}
-    </StyledButton>
+    <UploadContainer onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
+      <Title>📸 Upload an Image</Title>
+
+      {error && (
+        <ErrorContainer>
+          <AlertCircle size={18} style={{ marginRight: "6px" }} />
+          {error}
+        </ErrorContainer>
+      )}
+
+      {selectedFile ? (
+        <div>
+          <ImagePreview src={selectedFile} alt="Uploaded preview" />
+          <Button onClick={removeImage}>
+            <Trash2 size={18} style={{ marginRight: "6px" }} />
+            Remove Image
+          </Button>
+        </div>
+      ) : (
+        <>
+          <UploadLabel>
+            <ImageIcon size={48} style={{ color: "#9ca3af", marginBottom: "8px" }} />
+            <UploadText>Drag & Drop or Click to Upload</UploadText>
+            <HiddenInput
+              ref={fileInputRef} // ✅ Assign ref to the hidden file input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+          </UploadLabel>
+          <Button onClick={triggerFileInput}> {/* ✅ Calls function to open file picker */}
+            <Upload size={18} style={{ marginRight: "6px" }} />
+            Choose File
+          </Button>
+        </>
+      )}
+    </UploadContainer>
   );
 };
 
-export default Button;
+export default ImageUpload;

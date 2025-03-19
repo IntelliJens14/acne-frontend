@@ -66,7 +66,7 @@ const HiddenInput = styled.input`
   display: none;
 `;
 
-const ImageUpload = ({ onUpload }) => {
+const ImageUpload = ({ onUpload = () => {} }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(null);
 
@@ -94,8 +94,11 @@ const ImageUpload = ({ onUpload }) => {
 
     const reader = new FileReader();
     reader.onload = () => {
+      console.log("FileReader result:", reader.result);
       setSelectedFile(reader.result);
-      onUpload(reader.result);
+      if (typeof onUpload === "function") {
+        onUpload(reader.result);
+      }
     };
     reader.readAsDataURL(file);
     setError(null);

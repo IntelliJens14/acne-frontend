@@ -41,10 +41,17 @@ const Video = styled.video`
   height: 100%;
   object-fit: cover;
   border-radius: 0.5rem;
+  display: ${({ isActive }) => (isActive ? "block" : "none")}; /* ✅ Hide when inactive */
 `;
 
-const PlaceholderText = styled.p`
+const Placeholder = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1rem;
   color: #6b7280;
+  display: ${({ isActive }) => (isActive ? "none" : "block")}; /* ✅ Show only when inactive */
 `;
 
 const ButtonContainer = styled.div`
@@ -113,7 +120,7 @@ const CameraCapture = ({ onCapture }) => {
 
   return (
     <CameraContainer>
-      <Title>Use Camera</Title>
+      <Title>📷 Camera Preview</Title>
 
       {error ? (
         <ErrorContainer>
@@ -122,13 +129,8 @@ const CameraCapture = ({ onCapture }) => {
         </ErrorContainer>
       ) : (
         <VideoContainer>
-          {isCameraActive ? (
-            <Video ref={videoRef} autoPlay playsInline muted />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <PlaceholderText>Camera preview will appear here</PlaceholderText>
-            </div>
-          )}
+          <Video ref={videoRef} autoPlay playsInline muted isActive={isCameraActive} />
+          <Placeholder isActive={isCameraActive}>Camera preview will appear here</Placeholder>
         </VideoContainer>
       )}
 
