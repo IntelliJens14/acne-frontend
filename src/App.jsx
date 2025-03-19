@@ -101,7 +101,7 @@ function App() {
       try {
         if (!tf.ENV.get("WEBGL_VERSION")) throw new Error("WebGL not supported");
         console.log("Loading model...");
-        const loadedModel = await tf.loadLayersModel('/model.json'); // 🔹 Ensure it's correctly fetched
+        const loadedModel = await tf.loadGraphModel('/model/model.json');
         setModel(loadedModel);
         console.log("Model loaded successfully.");
       } catch (error) {
