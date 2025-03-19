@@ -27,7 +27,8 @@
               "kernel_size": [3, 3],
               "strides": [1, 1],
               "padding": "valid",
-              "activation": "relu"
+              "activation": "relu",
+              "dtype": "float32"
             }
           },
           {
@@ -35,7 +36,8 @@
             "config": {
               "name": "max_pooling2d",
               "pool_size": [2, 2],
-              "strides": [2, 2]
+              "strides": [2, 2],
+              "dtype": "float32"
             }
           },
           {
@@ -46,7 +48,8 @@
               "kernel_size": [3, 3],
               "strides": [1, 1],
               "padding": "valid",
-              "activation": "relu"
+              "activation": "relu",
+              "dtype": "float32"
             }
           },
           {
@@ -54,13 +57,15 @@
             "config": {
               "name": "max_pooling2d_1",
               "pool_size": [2, 2],
-              "strides": [2, 2]
+              "strides": [2, 2],
+              "dtype": "float32"
             }
           },
           {
             "class_name": "Flatten",
             "config": {
-              "name": "flatten"
+              "name": "flatten",
+              "dtype": "float32"
             }
           },
           {
@@ -68,14 +73,16 @@
             "config": {
               "name": "dense",
               "units": 128,
-              "activation": "relu"
+              "activation": "relu",
+              "dtype": "float32"
             }
           },
           {
             "class_name": "Dropout",
             "config": {
               "name": "dropout",
-              "rate": 0.4
+              "rate": 0.4,
+              "dtype": "float32"
             }
           },
           {
@@ -83,7 +90,8 @@
             "config": {
               "name": "dense_1",
               "units": 4,
-              "activation": "softmax"
+              "activation": "softmax",
+              "dtype": "float32"
             }
           }
         ]
@@ -99,42 +107,42 @@
         {
           "name": "sequential/conv2d/kernel",
           "shape": [3, 3, 3, 32],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/conv2d/bias",
           "shape": [32],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/conv2d_1/kernel",
           "shape": [3, 3, 32, 64],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/conv2d_1/bias",
           "shape": [64],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/dense/kernel",
           "shape": [16384, 128],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/dense/bias",
           "shape": [128],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/dense_1/kernel",
           "shape": [128, 4],
-          "dtype": "float16"
+          "dtype": "float32"
         },
         {
           "name": "sequential/dense_1/bias",
           "shape": [4],
-          "dtype": "float16"
+          "dtype": "float32"
         }
       ]
     }
