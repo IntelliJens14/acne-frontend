@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Camera, Upload, XCircle } from 'lucide-react';
+import { Camera, Upload } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 
+// Styled Components
 const Container = styled.div`
   max-width: 500px;
   width: 100%;
@@ -12,23 +13,25 @@ const Container = styled.div`
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  margin: auto;
+  padding: 10px;
 `;
 
 const Header = styled.div`
   background-color: #3366CC;
   color: white;
-  padding: 30px;
+  padding: 20px;
   text-align: center;
 `;
 
 const Title = styled.h1`
-  font-size: 32px;
+  font-size: 24px;
   margin-bottom: 10px;
 `;
 
 const Section = styled.div`
   background-color: white;
-  padding: 40px 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,9 +46,9 @@ const Button = styled.button`
   background-color: #3366CC;
   color: white;
   border: none;
-  padding: 15px 0;
+  padding: 12px 0;
   border-radius: 8px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   width: 80%;
@@ -57,7 +60,7 @@ const Button = styled.button`
 const UploadArea = styled.div`
   border: 2px dashed #ccc;
   border-radius: 8px;
-  padding: 40px;
+  padding: 30px;
   text-align: center;
   width: 80%;
   cursor: pointer;
@@ -89,11 +92,49 @@ const ModelInfo = styled.div`
   text-align: center;
 `;
 
+// Severity Bar Styles
+const SeverityContainer = styled.div`
+  margin-top: 15px;
+  width: 100%;
+  text-align: center;
+`;
+
+const SeverityLabel = styled.div`
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+`;
+
+const SeverityBar = styled.div`
+  width: 80%;
+  height: 15px;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: auto;
+`;
+
+const SeverityFill = styled.div`
+  height: 100%;
+  width: ${({ level }) => level * 25}%;
+  background: ${({ level }) => {
+    switch (level) {
+      case 0: return '#28a745'; // Green - Extremely Mild
+      case 1: return '#17a2b8'; // Blue - Mild
+      case 2: return '#fd7e14'; // Orange - Moderate
+      case 3: return '#dc3545'; // Red - Severe
+      default: return '#ccc';
+    }
+  }};
+  transition: width 0.5s ease-in-out;
+`;
+
 function App() {
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [model, setModel] = useState(null);
+  const [severityLevel, setSeverityLevel] = useState(null);
   const videoRef = useRef(null);
   
   useEffect(() => {
@@ -143,6 +184,20 @@ function App() {
     }
   };
 
+  const analyzeImage = async () => {
+    if (!model) return alert("Model not loaded yet!");
+
+    const imgElement = document.createElement('img');
+    imgElement.src = capturedImage || uploadedImage;
+    await imgElement.decode();
+
+    const tensor = tf.browser.fromPixels(imgElement).resizeNearestNeighbor([224, 224]).expandDims(0).toFloat();
+    const prediction = model.predict(tensor);
+    const level = prediction.argMax(1).dataSync()[0]; // Assuming model outputs severity levels
+
+    setSeverityLevel(level);
+  };
+
   return (
     <Container>
       <Header>
@@ -172,6 +227,18 @@ function App() {
       {(capturedImage || uploadedImage) && (
         <Section>
           <ImagePreview src={capturedImage || uploadedImage} alt="Uploaded" />
+          <Button onClick={analyzeImage}>Analyze</Button>
+          
+          {severityLevel !== null && (
+            <SeverityContainer>
+              <SeverityLabel>
+                {["Level 0: Extremely Mild", "Level 1: Mild", "Level 2: Moderate", "Level 3: Severe"][severityLevel]}
+              </SeverityLabel>
+              <SeverityBar>
+                <SeverityFill level={severityLevel} />
+              </SeverityBar>
+            </SeverityContainer>
+          )}
         </Section>
       )}
     </Container>
