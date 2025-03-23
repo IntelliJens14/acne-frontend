@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Upload, Trash2, Image as ImageIcon, AlertCircle } from "lucide-react";
 import styled from "styled-components";
 import Button from "./Button";
@@ -42,11 +42,16 @@ const ErrorContainer = styled.div`
 
 const ImagePreview = styled.img`
   width: 100%;
+  max-height: 300px;
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
   object-fit: cover;
-  max-height: 300px;
+  transition: transform 0.3s ease-in-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 `;
 
 const UploadLabel = styled.label`
@@ -66,9 +71,10 @@ const HiddenInput = styled.input`
   display: none;
 `;
 
-const ImageUpload = ({ onUpload = () => {} }) => {
+const ImageUpload = ({ onUpload }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(null);
+  const fileInputRef = useRef(null); // ✅ Use a ref to access the file input
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -109,6 +115,12 @@ const ImageUpload = ({ onUpload = () => {} }) => {
     setError(null);
   };
 
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // ✅ Programmatically trigger file selection
+    }
+  };
+
   return (
     <UploadContainer onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
       <Title>📸 Upload an Image</Title>
@@ -133,9 +145,14 @@ const ImageUpload = ({ onUpload = () => {} }) => {
           <UploadLabel>
             <ImageIcon size={48} style={{ color: "#9ca3af", marginBottom: "8px" }} />
             <UploadText>Drag & Drop or Click to Upload</UploadText>
-            <HiddenInput type="file" accept="image/*" onChange={handleFileChange} />
+            <HiddenInput
+              ref={fileInputRef} // ✅ Assign ref to the hidden file input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
           </UploadLabel>
-          <Button>
+          <Button onClick={triggerFileInput}> {/* ✅ Calls function to open file picker */}
             <Upload size={18} style={{ marginRight: "6px" }} />
             Choose File
           </Button>
