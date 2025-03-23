@@ -1,8 +1,14 @@
 import { Loader2, RefreshCw, XCircle, AlertTriangle } from "lucide-react";
 import Button from "./Button";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
-// Styled Components
+// ✅ Smooth Fade-In Animation
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+// ✅ Styled Components
 const ResultContainer = styled.div`
   text-align: center;
   padding: 1.5rem;
@@ -11,11 +17,12 @@ const ResultContainer = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   max-width: 500px;
   margin: auto;
+  animation: ${fadeIn} 0.3s ease-in-out;
 `;
 
 const Title = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: bold;
   margin-bottom: 1rem;
   color: #1f2937;
 `;
@@ -39,15 +46,21 @@ const SeverityLabel = styled.div`
   padding: 0.75rem;
   border-radius: 0.375rem;
   font-weight: 600;
+  text-align: center;
+  font-size: 1.1rem;
   background-color: ${(props) => props.bg};
   color: ${(props) => props.color};
-  margin-bottom: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+  margin-bottom: 0.75rem;
 `;
 
 const ConfidenceText = styled.p`
   margin-top: 0.5rem;
   color: #374151;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 500;
 `;
 
 const WarningContainer = styled.div`
@@ -59,12 +72,29 @@ const WarningContainer = styled.div`
   font-size: 0.9rem;
 `;
 
-// Severity Levels Mapping
+// ✅ Severity Progress Bar
+const ProgressBarContainer = styled.div`
+  width: 100%;
+  max-width: 300px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+`;
+
+const ProgressBar = styled.div`
+  height: 12px;
+  width: ${(props) => props.width}%;
+  background-color: ${(props) => props.color};
+  transition: width 0.5s ease-in-out;
+`;
+
+// ✅ Severity Levels Mapping
 const severityLevels = {
-  0: { label: "Extremely Mild", color: "#10b981", bg: "#d1fae5" },
-  1: { label: "Mild", color: "#f59e0b", bg: "#fef3c7" },
-  2: { label: "Moderate", color: "#f97316", bg: "#ffedd5" },
-  3: { label: "Severe", color: "#ef4444", bg: "#fee2e2" },
+  0: { label: "Extremely Mild", color: "#10b981", bg: "#d1fae5", width: 25 },
+  1: { label: "Mild", color: "#f59e0b", bg: "#fef3c7", width: 50 },
+  2: { label: "Moderate", color: "#f97316", bg: "#ffedd5", width: 75 },
+  3: { label: "Severe", color: "#ef4444", bg: "#fee2e2", width: 100 },
 };
 
 const ResultDisplay = ({ image, result, isLoading, error, onReset }) => {
@@ -105,6 +135,10 @@ const ResultDisplay = ({ image, result, isLoading, error, onReset }) => {
       <SeverityLabel bg={severityInfo.bg} color={severityInfo.color}>
         Acne Severity: {severityInfo.label}
       </SeverityLabel>
+
+      <ProgressBarContainer>
+        <ProgressBar width={severityInfo.width} color={severityInfo.color} />
+      </ProgressBarContainer>
 
       <ConfidenceText>
         Confidence: <strong>{(result.confidence * 100).toFixed(2)}%</strong>
