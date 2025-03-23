@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Camera, Upload } from 'lucide-react';
+import { Camera, Upload, Loader } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 
 // Styled Components
@@ -92,7 +92,6 @@ const ModelInfo = styled.div`
   text-align: center;
 `;
 
-// Severity Bar Styles
 const SeverityContainer = styled.div`
   margin-top: 15px;
   width: 100%;
@@ -119,10 +118,10 @@ const SeverityFill = styled.div`
   width: ${({ level }) => level * 25}%;
   background: ${({ level }) => {
     switch (level) {
-      case 0: return '#28a745'; // Green - Extremely Mild
-      case 1: return '#17a2b8'; // Blue - Mild
-      case 2: return '#fd7e14'; // Orange - Moderate
-      case 3: return '#dc3545'; // Red - Severe
+      case 0: return '#28a745';
+      case 1: return '#17a2b8';
+      case 2: return '#fd7e14';
+      case 3: return '#dc3545';
       default: return '#ccc';
     }
   }};
@@ -135,14 +134,16 @@ function App() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [model, setModel] = useState(null);
   const [severityLevel, setSeverityLevel] = useState(null);
+  const [loading, setLoading] = useState(false);
   const videoRef = useRef(null);
-  
+
   useEffect(() => {
     async function loadModel() {
       try {
         if (!tf.ENV.get("WEBGL_VERSION")) throw new Error("WebGL not supported");
         console.log("Loading model...");
-        const loadedModel = await tf.loadGraphModel('/model/model.json');
+        
+        const loadedModel = await tf.loadGraphModel(`${process.env.PUBLIC_URL}/model/model.json`);
         setModel(loadedModel);
         console.log("Model loaded successfully.");
       } catch (error) {
@@ -168,9 +169,9 @@ function App() {
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      ctx.drawImage(videoRef.current, 0, 0);
+      canvas.width = 224;
+      canvas.height = 224;
+      ctx.drawImage(videoRef.current, 0, 0, 224, 224);
       setCapturedImage(canvas.toDataURL('image/jpeg'));
     }
   };
@@ -186,16 +187,24 @@ function App() {
 
   const analyzeImage = async () => {
     if (!model) return alert("Model not loaded yet!");
-
+    
+    setLoading(true);
+    
     const imgElement = document.createElement('img');
     imgElement.src = capturedImage || uploadedImage;
     await imgElement.decode();
 
-    const tensor = tf.browser.fromPixels(imgElement).resizeNearestNeighbor([224, 224]).expandDims(0).toFloat();
-    const prediction = model.predict(tensor);
-    const level = prediction.argMax(1).dataSync()[0]; // Assuming model outputs severity levels
+    const tensor = tf.browser.fromPixels(imgElement)
+      .resizeNearestNeighbor([224, 224])
+      .toFloat()
+      .div(tf.scalar(255))
+      .expandDims();
+
+    const prediction = await model.predict(tensor).data();
+    const level = prediction.indexOf(Math.max(...prediction));
 
     setSeverityLevel(level);
+    setLoading(false);
   };
 
   return (
@@ -227,16 +236,14 @@ function App() {
       {(capturedImage || uploadedImage) && (
         <Section>
           <ImagePreview src={capturedImage || uploadedImage} alt="Uploaded" />
-          <Button onClick={analyzeImage}>Analyze</Button>
-          
+          <Button onClick={analyzeImage} disabled={loading}>
+            {loading ? <Loader size={24} /> : "Analyze"}
+          </Button>
+
           {severityLevel !== null && (
             <SeverityContainer>
-              <SeverityLabel>
-                {["Level 0: Extremely Mild", "Level 1: Mild", "Level 2: Moderate", "Level 3: Severe"][severityLevel]}
-              </SeverityLabel>
-              <SeverityBar>
-                <SeverityFill level={severityLevel} />
-              </SeverityBar>
+              <SeverityLabel>{["Extremely Mild", "Mild", "Moderate", "Severe"][severityLevel]}</SeverityLabel>
+              <SeverityBar><SeverityFill level={severityLevel} /></SeverityBar>
             </SeverityContainer>
           )}
         </Section>
